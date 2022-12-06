@@ -1,0 +1,295 @@
+import React, { useState, useEffect } from "react";
+import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View, TouchableNativeFeedback } from "react-native";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+ 
+ 
+import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+ import axiosInstance from "app/networking/api";
+const Tab = createBottomTabNavigator();
+let width = Dimensions.get("window").width;
+
+
+
+
+
+export default function TabNavigation(props) {
+  const [add, setAdd] = useState(null)
+  const [modalVisable, setModalVisable] = useState(false)
+
+  let getPartner = async () => {
+    let data = await AsyncStorage.getItem('partner', (err, value) => {
+      if (err) {
+        console.log(err)
+      } else {
+      }
+    })
+    return JSON.parse(data)
+  } 
+
+  const onGetLover = async () => {
+    try { 
+        await axiosInstance.get(`user/invitation/lover`) 
+         setAdd(true) 
+    } catch (e) { 
+        console.log(e, 'err3');
+    }
+}
+
+  useEffect(() => {
+    onGetLover()
+  }, [props.navigation])
+
+
+  return (
+    <>
+      <Tab.Navigator
+        screenOptions={({ route }) => ({
+          headerShown: false,
+          tabBarActiveTintColor: "#000",
+          tabBarStyle: {
+            backgroundColor: "#FFF",
+            borderWidth: 1,
+            borderTopEndRadius: 30,
+            borderTopLeftRadius: 30,
+            borderColor: '#C4C0BF',
+            marginTop: 5, paddingTop: 25,
+            height: 57,
+            position: "absolute",
+          },
+
+          unmountOnBlur: true,
+          tabBarIcon: ({ focused, color, size }) => {
+            let imageSource = null;
+            if (route.name === "HomeNavigation") {
+
+              imageSource = Home;
+            }
+            if (route.name === "BlogNavigation") {
+              imageSource = Note;
+            }
+            if (route.name === "CreateEventNavigation") {
+              imageSource = TabCalendar;
+            }
+            if (route.name === "ShareScreen") {
+              imageSource = Share;
+            }
+            if (route.name === "SettingsNavigation") {
+              imageSource = Settings;
+            }
+            if (route.name === "CreateEventNavigation") {
+              return (focused ?
+                <TouchableOpacity
+                  {...props}
+                  style={{
+                    height: 68,
+                    width: 68,
+                    borderRadius: 100,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: 50,
+                    backgroundColor: '#EB1829',
+                  }}
+                  onPress={() => {
+                    // props.navigation.navigate('AddEvent')
+                    // alert('eeeeee')
+                  }}>
+                  <Image
+                    style={{
+                      height: 40,
+                      width: 40,
+                      resizeMode: 'contain'
+                    }}
+                    source={AddEvent}
+                  />
+                </TouchableOpacity>
+                : <Image
+                  style={{
+                    height: 68,
+                    width: 68,
+                    resizeMode: "contain",
+                    marginBottom: 50
+                  }}
+                  source={imageSource}
+                />)
+
+            } else {
+              return (
+                <View style={{ alignItems: "center", justifyContent: "center" }}>
+                  {focused ?
+                    <Image
+                      style={{
+                        height: 24,
+                        width: 24,
+                        resizeMode: "contain",
+                        tintColor: color,
+                      }}
+                      source={imageSource}
+                    />
+                    :
+                    <Image
+                      style={{
+                        height: 24,
+                        width: 24,
+                        resizeMode: "contain",
+                      }}
+                      source={imageSource}
+                    />
+                  }
+                </View>
+              );
+            }
+          }
+
+        }
+        )
+        }
+
+      >
+        <Tab.Screen name="HomeNavigation" component={HomeNavigation}
+          options={({ route }) => ({
+            title: '',
+            tabBarVisible:
+              ((route) => {
+                const routeName = getFocusedRouteNameFromRoute(route) ?? ""
+                if (routeName === "Profile") { return false }
+                if (routeName === "EditProfile") { return false }
+                if (routeName === "Notification") { return false }
+                if (routeName === "WantNeedList") { return false }
+                if (routeName === "WantNeedItem") { return false }
+                if (routeName === "WantNeedInfo") { return false }
+                return true
+              })(route),
+            tabBarButton:
+              ((route) => {
+                const routeName = getFocusedRouteNameFromRoute(route) ?? ""
+                if (routeName === "Profile") { () => null }
+                if (routeName === "EditProfile") { () => null }
+                if (routeName === "Notification") { () => null }
+                if (routeName === "WantNeedList") { () => null }
+                if (routeName === "WantNeedItem") { () => null }
+                if (routeName === "WantNeedInfo") { () => null }
+
+              })(route),
+            tabBarStyle: ((route) => {
+              const routeName = getFocusedRouteNameFromRoute(route) ?? ""
+              if (routeName === "Profile") { return { display: 'none' } }
+              if (routeName === "EditProfile") { return { display: 'none' } }
+              if (routeName === "Notification") { return { display: 'none' } }
+              if (routeName === "WantNeedList") { return { display: 'none' } }
+              if (routeName === "WantNeedItem") { return { display: 'none' } }
+              if (routeName === "WantNeedInfo") { return { display: 'none' } }
+              return styles.generalStyle
+            })(route),
+          })}
+        />
+        
+        {/* <Tab.Screen name="CreateEventNavigation" component={CreateEventNavigation}
+          options={({ route }) => ({
+            title: '',
+            tabBarVisible:
+              ((route) => {
+                const routeName = getFocusedRouteNameFromRoute(route) ?? ""
+                if (routeName === "AddEvent") { return false }
+                return true
+              })(route),
+            tabBarButton:
+              ((route) => {
+                const routeName = getFocusedRouteNameFromRoute(route) ?? ""
+                if (routeName === "AddEvent") { () => null }
+              })(route),
+            tabBarStyle: ((route) => {
+              const routeName = getFocusedRouteNameFromRoute(route) ?? ""
+              if (routeName === "AddEvent") { return { display: 'none' } }
+              return styles.generalStyle
+            })(route),
+
+          })}
+          listeners={({ navigation, route }) => ({
+            tabPress: (e) => {
+              add ? navigation.navigate('AddEvent') : setModalVisable(!modalVisable);
+              // props.navigation.navigate('CreateEventNavigation',{screen:'CreateEvent'})
+            },
+
+          })}
+
+
+        /> */}
+       
+         
+
+
+      </Tab.Navigator>
+       
+    </>
+
+  );
+}
+
+
+
+const styles = StyleSheet.create({
+  content: {
+    width: width,
+    marginTop: 22,
+    paddingHorizontal: 24,
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    paddingBottom: 24,
+  },
+  title_view: {
+    marginTop: 30,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
+  title_text: {
+    fontWeight: '600',
+    fontSize: 20,
+    fontFamily: "Poppins-Regular",
+    color: '#fff'
+  },
+  close_img: {
+    width: 16,
+    height: 16,
+    resizeMode: 'contain'
+  },
+  item_btn: {
+    height: 64,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255, 0.1)'
+  },
+  item_text: {
+    fontWeight: '500',
+    fontSize: 14,
+    fontFamily: "Poppins-Regular",
+    color: '#fff'
+  },
+  right_img: {
+    width: 13,
+    height: 13,
+    resizeMode: 'contain'
+  },
+  generalStyle: {
+    backgroundColor: "#FFF",
+    borderWidth: 1,
+    borderTopEndRadius: 30,
+    borderTopLeftRadius: 30,
+    borderColor: '#C4C0BF',
+    marginTop: 5, paddingTop: 25,
+    height: 57,
+    position: "absolute",
+  }
+
+});
